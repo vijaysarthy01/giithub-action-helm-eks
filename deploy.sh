@@ -4,6 +4,8 @@ set -euo pipefail
 # catch exit 1 (which is a special case in grep meaning 'no matches') so that we can use pipefail
 _grep() { grep "$@" || test $? = 1; }
 
+HELM_AUTH=""
+
 # First Install any required helm plugins
 if [ -n "${PLUGINS_LIST}" ]; then
     plugins=${PLUGINS_LIST//,/ }
@@ -28,6 +30,40 @@ else
         update-kubeconfig --name ${CLUSTER_NAME}
 fi
 
+# If defined, will set up authentication parameters
+if [ "${HELM_ACTION}" == "install" ]; then
+
+    # Authentication management
+
+    if [ -n "$CA_FILE" ]; then
+        HELM_AUTH="${HELM_AUTH} --ca-file ${CA_FILE}"
+    fi
+
+    if [ -n "$CERT_FILE" ]; then
+        HELM_AUTH="${HELM_AUTH} --cert-file ${CERT_FILE}"
+    fi
+
+    if [ -n "$KEY_FILE" ]; then
+        HELM_AUTH="${HELM_AUTH} --key-file ${KEY_FILE}"
+    fi
+
+    if [ -n "$SKIP_TLS" ]; then
+        HELM_AUTH="${HELM_AUTH} --insecure-skip-tls-verify"
+    fi
+
+    if [ -n "$PASS_CREDENTIALS" ]; then
+        HELM_AUTH="${HELM_AUTH} --pass-credentials"
+    fi
+
+    if [ -n "$REPO_USERNAME" ]; then
+        HELM_AUTH="${HELM_AUTH} --username ${REPO_USERNAME}"
+    fi
+
+    if [ -n "$REPO_PASSWORD" ]; then
+        HELM_AUTH="${HELM_AUTH} --password ${REPO_PASSWORD}"
+    fi
+fi
+
 # Checking to see if a repo URL is in the path, if so add it or update.
 if [ -n "${HELM_REPOSITORY}" ]; then
     HELM_CHART_NAME="${DEPLOY_CHART_PATH%/*}"
@@ -36,7 +72,7 @@ if [ -n "${HELM_REPOSITORY}" ]; then
     CHART_REPO_EXISTS=$(echo $HELM_REPOS | _grep ^${HELM_CHART_NAME})
     if [ -z "${CHART_REPO_EXISTS}" ]; then
         echo "Adding repo ${HELM_CHART_NAME} (${HELM_REPOSITORY})"
-        helm repo add "${HELM_CHART_NAME}" "${HELM_REPOSITORY}"
+        helm repo add "${HELM_CHART_NAME}" "${HELM_REPOSITORY}" "${HELM_AUTH}"
     else
         echo "Updating repo ${HELM_CHART_NAME}"
         helm repo update "${HELM_CHART_NAME}"
@@ -45,7 +81,7 @@ fi
 
 if [ "${HELM_ACTION}" == "install" ]; then
     # Upgrade or install the chart.  This does it all.
-    HELM_COMMAND="helm upgrade --install --create-namespace --timeout ${TIMEOUT}"
+    HELM_COMMAND="helm upgrade --install --create-namespace --timeout ${TIMEOUT}  ${HELM_AUTH}"
 
     # If we should wait, then do so 
     if [ -n "${HELM_WAIT}" ]; then
