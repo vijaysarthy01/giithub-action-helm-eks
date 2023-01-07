@@ -71,8 +71,8 @@ if [ -n "${HELM_REPOSITORY}" ]; then
     HELM_REPOS=$(helm repo list || true)
     CHART_REPO_EXISTS=$(echo $HELM_REPOS | _grep ^${HELM_CHART_NAME})
     if [ -z "${CHART_REPO_EXISTS}" ]; then
-        echo "helm repo add ${HELM_CHART_NAME} ${HELM_REPOSITORY} ${HELM_AUTH}"
-        helm repo add "${HELM_CHART_NAME}" "${HELM_REPOSITORY}" "${HELM_AUTH} --debug"
+        echo "helm repo add ${HELM_CHART_NAME} ${HELM_REPOSITORY} ${HELM_AUTH} --debug"
+        helm repo add "${HELM_CHART_NAME}" "${HELM_REPOSITORY}" "${HELM_AUTH}" --debug
     else
         echo "Updating repo ${HELM_CHART_NAME}"
         helm repo update "${HELM_CHART_NAME}"
