@@ -1,0 +1,89 @@
+# action.yml
+name: 'Deploy Helm to EKS'
+description: 'Deploy a helm chart to an EKS cluster using IAM authentication.'
+branding:
+    icon: anchor
+    color: red
+inputs:
+    aws-secret-access-key:
+        description: 'AWS credentials used to login to eks.'
+        required: false
+    aws-access-key-id:
+        description: 'AWS credentials used to login to eks.'
+        required: false
+    aws-region:
+        description: 'AWS region to use (default: us-west-2)'
+        required: true
+        default: us-west-2
+    cluster-name:
+        description: 'EKS cluster name.'
+        required: true
+    cluster-role-arn:
+        description: 'EKS cluster admin role arn.'
+        required: false
+    config-files:
+        description: 'Comma separated list of helm values files.'
+        required: false
+    namespace:
+        description: 'Kubernetes namespace to use.'
+        required: false
+    values:
+        description: 'Comma separated list of value sets for helms. e.x: key1=value1,key2=value2'
+        required: false
+    name:
+        description: 'Name of the helm deploy.'
+        required: true
+    action:
+        description: 'Specify whether you want to install or uninstall the target helm chart'
+        required: false
+        default: 'install'
+    chart-path:
+        description: 'The path of the chart.'
+        required: false
+        default: 'helm/'
+    chart-repository:
+        description: 'The repository of the chart.'
+        required: false
+    version:
+        description: 'The chart version'
+        required: false
+    timeout:
+        description: 'Timeout for the job.'
+        required: true
+        default: "0s"
+    update-deps:
+        description: 'Update chart dependencies'
+        required: false
+        default: "true"
+    plugins:
+        description: 'Comma separated list of helm plugins to install. e.x: https://github.com/hypnoglow/helm-s3.git,https://github.com/someuser/helm-plugin.git'
+        required: false
+    helm-wait:
+        description: 'Add the --wait flag to helm'
+        required: false
+    atomic:
+        description: 'Add the --atomic flag to rollback on failure'
+        required: false
+
+runs:
+    using: 'docker'
+    image: 'docker://bitovi/deploy-eks-helm:v1.1.0'
+    env:
+        AWS_REGION: ${{ inputs.aws-region }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        CLUSTER_NAME: ${{ inputs.cluster-name }}
+        CLUSTER_ROLE_ARN: ${{ inputs.cluster-role-arn }}
+        DEPLOY_CONFIG_FILES: ${{ inputs.config-files }}
+        DEPLOY_NAMESPACE: ${{ inputs.namespace }}
+        DEPLOY_VALUES: ${{ inputs.values }}
+        DEPLOY_NAME: ${{ inputs.name }}
+        DEPLOY_CHART_PATH: ${{ inputs.chart-path }}
+        TIMEOUT: ${{ inputs.timeout }}
+        UPDATE_DEPS: ${{ inputs.update-deps }}
+        HELM_REPOSITORY: ${{ inputs.chart-repository }}
+        HELM_WAIT: ${{ inputs.helm-wait }}
+        PLUGINS_LIST: ${{ inputs.plugins }}
+        HELM_ATOMIC: ${{ inputs.atomic }}
+        HELM_ACTION: ${{ inputs.action }}
+        VERSION: ${{ inputs.version }}
