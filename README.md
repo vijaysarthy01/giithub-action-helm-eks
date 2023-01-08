@@ -2,6 +2,8 @@
 
 GitHub action for deploying to AWS EKS clusters using helm.
 
+This Action deploys using helm in private repository accessible by user name and password
+
 Note:  If your EKS cluster administrative access is in a private network, you will need to use a self hosted runner in that network to use this action.
 
 ## Customizing
@@ -30,11 +32,13 @@ Following inputs can be used as `step.with` keys
 | `update-deps`           | String | Update chart dependencies                                                                                                                                 |
 | `helm-wait`             | String | Add the helm --wait flag to the helm Release (Optional)                                                                                                   |
 | `atomic`                | String | Add the helm --atomic flag if set (Optional)                                                                                                              |
+| `username`                | String | Add the helm --username flag if set (Optional)                                                                                                              |
+| `password`                | String | Add the helm --password flag if set (Optional)                                                                                                              |
 
 ## Example usage
 
 ```yaml
-uses: bitovi/github-actions-deploy-eks-helm@v1.1.0
+uses: vijaysarthy01/github-action-helm-eks@v1.0.3
 with:
   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -44,13 +48,15 @@ with:
   chart-path: chart/
   namespace: dev
   values: key1=value1,key2=value2
+  username: ${{ secrets.CD_JF_USER }}
+  password: ${{ secrets.CD_JF_PASSWORD }}
   name: release_name
 ```
 
 ## Example 2
 ```yaml
     - name: Deploy Helm
-      uses: bitovi/github-actions-deploy-eks-helm@v1.1.0
+      uses: vijaysarthy01/github-action-helm-eks@v1.0.3
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -69,7 +75,7 @@ with:
 ## Example Uninstall
 
 ```yaml
-uses: bitovi/github-actions-deploy-eks-helm@v1.0.4
+uses: vijaysarthy01/github-action-helm-eks@v1.0.3
 with:
   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
